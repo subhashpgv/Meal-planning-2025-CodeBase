@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Meal Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(128, 0, 128, 0.2);
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #6a0dad;
+            color: white;
+            font-weight: bold;
+        }
+        tr:first-child th {
+            background-color: #4a0080;
+        }
+        td:first-child {
+            font-weight: bold;
+            background-color: #f0e6f5;
+        }
+        .completed {
+            background-color: #c8e6c9;
+        }
+        .not-completed {
+            background-color: #bbdefb;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #6a0dad;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #4a0080;
+        }
+        h1 {
+            color: #6a0dad;
+            text-align: center;
+        }
+        #github-auth {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #github-auth input {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #e2f3f5;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weekly Meal Planner</h1>
+		 <div id="status-message" class="status-message hidden"></div>
+        
+        <div id="github-auth">
+            <h3>GitHub Authentication</h3>
+            <p>To save your meal plan progress across devices, please enter your GitHub information:</p>
+            <input type="text" id="username" placeholder="GitHub Username">
+            <input type="password" id="personal-token" placeholder="Personal Access Token">
+            <input type="text" id="repo-name" placeholder="Repository Name">
+            <button onclick="authenticateGitHub()">Connect to GitHub</button>
+            <p>Don't have a Personal Access Token? <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> with 'repo' scope.</p>
+            <div id="status-message" class="status-message hidden"></div>
+        </div>
+        
+        <div id="meal-planner" class="hidden">
+            <div class="controls">
+                <div>
+                    <button onclick="markAllCompleted()">Mark All Completed</button>
+                    <button onclick="markAllNotCompleted()">Mark All Not Completed</button>
+                    <button onclick="resetTable()">Reset Table</button>
+                </div>
+                <div>
+                    <button onclick="saveProgress()">Save Progress</button>
+                </div>
+            </div>
+            
+            <table id="mealTable">
+                <tr>
+                    <th></th>
+                    <th>Early-Morning(5:30)</th>
+                    <th>Breakfast (8:00)</th>
+                    <th>Lunch(11:45)</th>
+                    <th>Snacks(4 pm)</th>
+                    <th>Dinner(7 pm)</th>
+                </tr>
+                <tr>
+                    <td>SUN</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira - water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Ragi Sangati and sambar</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">steamed -Peanuts</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>MON</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Rice + curry</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Kira</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>TUE</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Samala Rice + curry</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">fruits</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>WED</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">varigalu Rice</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">veg salad</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>THU</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Rice +curry</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">pop-corn</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>FRI</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Korralu rice</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">curd mix</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+                <tr>
+                    <td>SAT</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Jira-water</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Oat-meal</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Rice +curry</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">Nuts</td>
+                    <td class="not-completed" onclick="toggleStatus(this)">any</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // GitHub API variables
+        let username = '';
+        let token = '';
+        let repoName = '';
+        let fileContent = null;
+        let fileSha = null;
+        const fileName = 'meal-planner-data.json';
+        
+        // Check if there's saved GitHub credentials in localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedCredentials = localStorage.getItem('githubCredentials');
+            if (savedCredentials) {
+                const credentials = JSON.parse(savedCredentials);
+                document.getElementById('username').value = credentials.username;
+                document.getElementById('personal-token').value = credentials.token;
+                document.getElementById('repo-name').value = credentials.repoName;
+            }
+        });
+
+        // Authenticate with GitHub
+        function authenticateGitHub() {
+            username = document.getElementById('username').value.trim();
+            token = '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';
+            repoName = document.getElementById('repo-name').value.trim();
+            
+            if (!username || !token || !repoName) {
+                showStatusMessage('Please fill in all GitHub fields', 'error');
+                return;
+            }
+            
+            // Save credentials to localStorage
+            localStorage.setItem('githubCredentials', JSON.stringify({
+                username,
+                token,
+                repoName
+            }));
+            
+            showStatusMessage('Connecting to GitHub...', 'loading');
+            
+            // Check if repository exists
+            fetch(`https://api.github.com/repos/${username}/${repoName}`, {
+                headers: {
+                    'Authorization': `token ${token}`
+                }
+            })
+            .then(response => {
+                if (response.status === 404) {
+                    // Repository doesn't exist, create it
+                    return createRepository();
+                } else if (response.status === 200) {
+                    // Repository exists, check if data file exists
+                    return checkDataFile();
+                } else {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+            })
+            .catch(error => {
+                showStatusMessage(`Authentication error: ${error.message}`, 'error');
+            });
+        }
+        
+        // Create a new repository
+        function createRepository() {
+            showStatusMessage('Creating repository...', 'loading');
+            
+            return fetch('https://api.github.com/user/repos', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: repoName,
+                    description: 'Repository for meal planner data',
+                    private: true
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create repository');
+                }
+                return checkDataFile();
+            });
+        }
+        
+        // Check if data file exists
+        function checkDataFile() {
+            return fetch(`https://api.github.com/repos/${username}/${repoName}/contents/${fileName}`, {
+                headers: {
+                    'Authorization': `token ${token}`
+                }
+            })
+            .then(response => {
+                if (response.status === 404) {
+                    // File doesn't exist, create it with initial data
+                    return createDataFile();
+                } else if (response.status === 200) {
+                    // File exists, load the data
+                    return response.json().then(data => {
+                        fileSha = data.sha;
+                        const content = JSON.parse(atob(data.content));
+                        loadMealPlanData(content);
+                        showStatusMessage('Data loaded successfully', 'success');
+                        document.getElementById('github-auth').classList.add('hidden');
+                        document.getElementById('meal-planner').classList.remove('hidden');
+                    });
+                } else {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+            });
+        }
+        
+        // Create initial data file
+        function createDataFile() {
+            showStatusMessage('Creating data file...', 'loading');
+            
+            const initialData = createMealPlanData();
+            
+            return fetch(`https://api.github.com/repos/${username}/${repoName}/contents/${fileName}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Initial meal planner data',
+                    content: btoa(JSON.stringify(initialData))
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create data file');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fileSha = data.content.sha;
+                loadMealPlanData(initialData);
+                showStatusMessage('Data file created successfully', 'success');
+                document.getElementById('github-auth').classList.add('hidden');
+                document.getElementById('meal-planner').classList.remove('hidden');
+            });
+        }
+        
+        // Create meal plan data from current table state
+        function createMealPlanData() {
+            const table = document.getElementById('mealTable');
+            const rows = table.rows;
+            const data = [];
+            
+            // Start from 1 to skip the header row
+            for (let i = 1; i < rows.length; i++) {
+                const rowData = [];
+                const cells = rows[i].cells;
+                
+                // Start from 1 to skip the day column
+                for (let j = 1; j < cells.length; j++) {
+                    rowData.push({
+                        text: cells[j].innerText,
+                        completed: cells[j].classList.contains('completed')
+                    });
+                }
+                data.push(rowData);
+            }
+            
+            return data;
+        }
+        
+        // Load meal plan data into table
+        function loadMealPlanData(data) {
+            const table = document.getElementById('mealTable');
+            const rows = table.rows;
+            
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                const rowData = data[i-1];
+                
+                for (let j = 1; j < cells.length; j++) {
+                    if (rowData[j-1].completed) {
+                        cells[j].classList.remove('not-completed');
+                        cells[j].classList.add('completed');
+                    } else {
+                        cells[j].classList.remove('completed');
+                        cells[j].classList.add('not-completed');
+                    }
+                }
+            }
+        }
+        
+        // Toggle cell status between completed and not completed
+        function toggleStatus(cell) {
+            if (cell.classList.contains('completed')) {
+                cell.classList.remove('completed');
+                cell.classList.add('not-completed');
+            } else {
+                cell.classList.remove('not-completed');
+                cell.classList.add('completed');
+            }
+        }
+        
+        // Mark all cells as completed
+        function markAllCompleted() {
+            const cells = document.querySelectorAll('td:not(:first-child)');
+            cells.forEach(cell => {
+                cell.classList.remove('not-completed');
+                cell.classList.add('completed');
+            });
+        }
+        
+        // Mark all cells as not completed
+        function markAllNotCompleted() {
+            const cells = document.querySelectorAll('td:not(:first-child)');
+            cells.forEach(cell => {
+                cell.classList.remove('completed');
+                cell.classList.add('not-completed');
+            });
+        }
+        
+        // Reset table to original state
+        function resetTable() {
+            const cells = document.querySelectorAll('td:not(:first-child)');
+            cells.forEach(cell => {
+                cell.classList.remove('completed');
+                cell.classList.add('not-completed');
+            });
+        }
+        
+        // Save progress to GitHub
+        function saveProgress() {
+            showStatusMessage('Saving progress...', 'loading');
+            
+            const data = createMealPlanData();
+            
+            fetch(`https://api.github.com/repos/${username}/${repoName}/contents/${fileName}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update meal planner data',
+                    content: btoa(JSON.stringify(data)),
+                    sha: fileSha
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to save data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                fileSha = data.content.sha;
+                showStatusMessage('Progress saved successfully!', 'success');
+            })
+            .catch(error => {
+                showStatusMessage(`Error saving progress: ${error.message}`, 'error');
+            });
+        }
+        
+        // Show status message
+        function showStatusMessage(message, type) {
+            const statusMessageElement = document.getElementById('status-message');
+            statusMessageElement.textContent = message;
+            statusMessageElement.classList.remove('hidden', 'success', 'error', 'loading');
+            statusMessageElement.classList.add(type);
+        }
+    </script>
+</body>
+</html>
