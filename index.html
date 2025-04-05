@@ -222,7 +222,7 @@
         // Authenticate with GitHub
         function authenticateGitHub() {
             username = document.getElementById('username').value.trim();
-            token = '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';
+            token = document.getElementById('personal-token').value.trim();
             repoName = document.getElementById('repo-name').value.trim();
             
             if (!username || !token || !repoName) {
